@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover" />
+  <meta name="description" content="Manage your transactions" />
+  <meta name="theme-color" content="#0d6efd" />
+  <title>Expense Tracker – Transactions</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+  <link rel="stylesheet" href="assets/css/style.css?v=4" />
+</head>
+<body>
+
+<!-- Top Navbar -->
+<nav class="navbar fixed-top app-navbar" id="mainNavbar">
+  <div class="container-fluid px-3">
+    <button class="btn btn-link text-body p-1 me-2 d-none d-lg-inline-flex sidebar-toggle" id="sidebarToggle" aria-label="Toggle sidebar">
+      <i class="bi bi-layout-sidebar fs-5"></i>
+    </button>
+    <a class="navbar-brand fw-bold d-flex align-items-center gap-2" href="index.html">
+      <span class="brand-icon"><i class="bi bi-wallet2"></i></span>
+      <span>ExpenseTracker</span>
+    </a>
+    <div class="d-flex align-items-center gap-1 ms-auto">
+      <button class="btn btn-link text-body p-2" id="themeToggle" aria-label="Toggle theme">
+        <i class="bi bi-sun-fill fs-5" id="themeIcon"></i>
+      </button>
+      <button class="btn btn-primary btn-sm d-none d-lg-inline-flex align-items-center gap-1" data-bs-toggle="modal" data-bs-target="#transactionModal">
+        <i class="bi bi-plus-lg"></i> Add
+      </button>
+    </div>
+  </div>
+</nav>
+
+
+<!-- Layout Wrapper -->
+<div class="app-wrapper">
+
+  <!-- Sidebar -->
+  <aside class="app-sidebar" id="appSidebar">
+    <nav class="sidebar-nav">
+      <ul class="nav flex-column">
+        <li class="nav-item"><a class="nav-link" href="index.html"><i class="bi bi-speedometer2"></i><span>Dashboard</span></a></li>
+        <li class="nav-item"><a class="nav-link active" href="transactions.html" aria-current="page"><i class="bi bi-arrow-left-right"></i><span>Transactions</span></a></li>
+        <li class="nav-item"><a class="nav-link" href="reports.html"><i class="bi bi-bar-chart-line"></i><span>Reports</span></a></li>
+        <li class="nav-item"><a class="nav-link" href="budgets.html"><i class="bi bi-piggy-bank"></i><span>Budgets</span></a></li>
+        <li class="nav-item"><a class="nav-link" href="settings.html"><i class="bi bi-gear"></i><span>Settings</span></a></li>
+      </ul>
+    </nav>
+    <div class="sidebar-footer"><small class="text-muted">v1.0.0</small></div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="app-main" id="appMain">
+    <div class="container-fluid p-3 p-lg-4">
+
+      <!-- Page Header -->
+      <div class="d-flex align-items-center justify-content-between mb-3">
+        <h4 class="fw-bold mb-0">Transactions</h4>
+        <div class="d-flex gap-2 align-items-center">
+          <!-- Bulk delete: only when items selected -->
+          <button class="btn btn-outline-danger btn-sm d-none" id="bulkDeleteBtn">
+            <i class="bi bi-trash3"></i> <span id="bulkDeleteCount">0</span>
+          </button>
+          <!-- More actions dropdown (desktop) -->
+          <div class="dropdown d-none d-md-block">
+            <button class="btn btn-outline-secondary btn-sm dropdown-toggle" data-bs-toggle="dropdown">
+              <i class="bi bi-three-dots"></i>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><h6 class="dropdown-header">Export</h6></li>
+              <li><a class="dropdown-item" href="#" id="exportPDFBtn"><i class="bi bi-file-pdf text-danger me-2"></i>PDF</a></li>
+              <li><a class="dropdown-item" href="#" id="exportExcelBtn"><i class="bi bi-file-excel text-success me-2"></i>Excel</a></li>
+              <li><a class="dropdown-item" href="#" id="exportCSVBtn"><i class="bi bi-filetype-csv me-2"></i>CSV</a></li>
+              <li><a class="dropdown-item" href="#" id="exportJSONBtn"><i class="bi bi-filetype-json me-2"></i>JSON</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><h6 class="dropdown-header">Import</h6></li>
+              <li><a class="dropdown-item" href="#" id="importJSONBtn"><i class="bi bi-filetype-json me-2"></i>From JSON</a></li>
+              <li><a class="dropdown-item" href="#" id="importExcelBtn"><i class="bi bi-file-excel text-success me-2"></i>From Excel</a></li>
+              <li><a class="dropdown-item" href="#" id="importCSVBtn"><i class="bi bi-filetype-csv me-2"></i>From CSV</a></li>
+            </ul>
+          </div>
+          <!-- Mobile: icon-only export/import -->
+          <div class="dropdown d-md-none">
+            <button class="btn btn-link text-body p-1" data-bs-toggle="dropdown" aria-label="More options">
+              <i class="bi bi-three-dots-vertical fs-5"></i>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><h6 class="dropdown-header">Export</h6></li>
+              <li><a class="dropdown-item" href="#" id="exportPDFBtnM"><i class="bi bi-file-pdf text-danger me-2"></i>PDF</a></li>
+              <li><a class="dropdown-item" href="#" id="exportExcelBtnM"><i class="bi bi-file-excel text-success me-2"></i>Excel</a></li>
+              <li><a class="dropdown-item" href="#" id="exportCSVBtnM"><i class="bi bi-filetype-csv me-2"></i>CSV</a></li>
+              <li><a class="dropdown-item" href="#" id="exportJSONBtnM"><i class="bi bi-filetype-json me-2"></i>JSON</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><h6 class="dropdown-header">Import</h6></li>
+              <li><a class="dropdown-item" href="#" id="importJSONBtnM"><i class="bi bi-filetype-json me-2"></i>From JSON</a></li>
+              <li><a class="dropdown-item" href="#" id="importExcelBtnM"><i class="bi bi-file-excel text-success me-2"></i>From Excel</a></li>
+              <li><a class="dropdown-item" href="#" id="importCSVBtnM"><i class="bi bi-filetype-csv me-2"></i>From CSV</a></li>
+            </ul>
+          </div>
+          <button class="btn btn-primary btn-sm d-none d-lg-inline-flex align-items-center gap-1" data-bs-toggle="modal" data-bs-target="#transactionModal">
+            <i class="bi bi-plus-lg"></i> Add
+          </button>
+        </div>
+      </div>
+
+      <!-- Always-visible search + quick filter chips -->
+      <div class="mb-3">
+        <div class="input-group mb-2">
+          <span class="input-group-text bg-transparent"><i class="bi bi-search text-muted"></i></span>
+          <input type="text" class="form-control border-start-0" id="searchInput" placeholder="Search transactions..." />
+          <button class="btn btn-outline-secondary" id="clearSearchBtn" title="Clear"><i class="bi bi-x"></i></button>
+        </div>
+        <!-- Quick type filter chips -->
+        <div class="d-flex gap-2 overflow-x-auto pb-1 quick-chips">
+          <button class="btn btn-sm chip-btn active" data-type="">All</button>
+          <button class="btn btn-sm chip-btn" data-type="Income"><i class="bi bi-arrow-down-circle me-1 text-success"></i>Income</button>
+          <button class="btn btn-sm chip-btn" data-type="Expense"><i class="bi bi-arrow-up-circle me-1 text-danger"></i>Expense</button>
+          <button class="btn btn-sm chip-btn" data-period="thisMonth">This Month</button>
+          <button class="btn btn-sm chip-btn" data-period="lastMonth">Last Month</button>
+        </div>
+      </div>
+
+      <!-- Filters Card -->
+      <div class="card border-0 shadow-sm mb-3">
+        <div class="card-header bg-transparent border-bottom-0 d-flex align-items-center justify-content-between">
+          <span class="fw-semibold small text-muted"><i class="bi bi-funnel me-1"></i>Filters</span>
+          <button class="btn btn-sm btn-link text-muted p-0 d-md-none" type="button"
+                  data-bs-toggle="collapse" data-bs-target="#filterPanel"
+                  aria-expanded="false" aria-controls="filterPanel">
+            <i class="bi bi-chevron-down"></i>
+          </button>
+        </div>
+        <div class="collapse d-md-block" id="filterPanel">
+        <div class="card-body p-3 pt-0">
+          <div class="row g-2 align-items-end">
+            <!-- Date From -->
+            <div class="col-6 col-md-2">
+              <label class="form-label form-label-sm mb-1">From</label>
+              <input type="date" class="form-control form-control-sm" id="filterDateFrom" />
+            </div>
+            <!-- Date To -->
+            <div class="col-6 col-md-2">
+              <label class="form-label form-label-sm mb-1">To</label>
+              <input type="date" class="form-control form-control-sm" id="filterDateTo" />
+            </div>
+            <!-- Type -->
+            <div class="col-6 col-md-1">
+              <label class="form-label form-label-sm mb-1">Type</label>
+              <select class="form-select form-select-sm" id="filterType">
+                <option value="">All</option>
+                <option value="Income">Income</option>
+                <option value="Expense">Expense</option>
+              </select>
+            </div>
+            <!-- Category -->
+            <div class="col-6 col-md-2">
+              <label class="form-label form-label-sm mb-1">Category</label>
+              <select class="form-select form-select-sm" id="filterCategory">
+                <option value="">All</option>
+              </select>
+            </div>
+            <!-- Actions -->
+            <div class="col-12 col-md-1 d-flex gap-1">
+              <button class="btn btn-primary btn-sm flex-fill" id="applyFiltersBtn">Apply</button>
+              <button class="btn btn-outline-secondary btn-sm" id="clearFiltersBtn" title="Clear filters"><i class="bi bi-x-circle"></i></button>
+            </div>
+          </div>
+          <!-- Second row for more filters -->
+          <div class="row g-2 mt-1">
+            <div class="col-6 col-md-2">
+              <select class="form-select form-select-sm" id="filterPaymentMethod">
+                <option value="">All Methods</option>
+                <option value="Cash">Cash</option>
+                <option value="Bank">Bank</option>
+                <option value="UPI">UPI</option>
+                <option value="Card">Card</option>
+                <option value="Wallet">Wallet</option>
+              </select>
+            </div>
+            <div class="col-6 col-md-2">
+              <select class="form-select form-select-sm" id="filterMonth">
+                <option value="">All Months</option>
+              </select>
+            </div>
+            <div class="col-6 col-md-2">
+              <select class="form-select form-select-sm" id="filterYear">
+                <option value="">All Years</option>
+              </select>
+            </div>
+            <div class="col-6 col-md-2">
+              <select class="form-select form-select-sm" id="sortBy">
+                <option value="date-desc">Newest First</option>
+                <option value="date-asc">Oldest First</option>
+                <option value="amount-desc">Highest Amount</option>
+                <option value="amount-asc">Lowest Amount</option>
+              </select>
+            </div>
+            <div class="col-6 col-md-2">
+              <select class="form-select form-select-sm" id="pageSize">
+                <option value="25">25 per page</option>
+                <option value="50">50 per page</option>
+                <option value="100">100 per page</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        </div><!-- /collapse -->
+      </div>
+
+      <!-- Results Summary -->
+      <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
+        <small class="text-muted" id="resultsCount">Loading...</small>
+        <div class="d-flex gap-3">
+          <small class="text-success"><i class="bi bi-arrow-down-circle me-1"></i>Income: <span id="filteredIncome" class="fw-semibold">—</span></small>
+          <small class="text-danger"><i class="bi bi-arrow-up-circle me-1"></i>Expense: <span id="filteredExpense" class="fw-semibold">—</span></small>
+        </div>
+      </div>
+
+      <!-- Transactions Table -->
+      <div class="card border-0 shadow-sm mb-3">
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" id="transactionsTable">
+              <thead class="table-light">
+                <tr>
+                  <th class="ps-3 hide-mobile" style="width:40px">
+                    <input type="checkbox" class="form-check-input" id="selectAllChk" />
+                  </th>
+                  <th>Date</th>
+                  <th class="hide-mobile">Type</th>
+                  <th>Category</th>
+                  <th class="hide-mobile">Note</th>
+                  <th class="hide-mobile">Method</th>
+                  <th class="text-end">Amount</th>
+                  <th class="text-end pe-3">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="transactionsBody">
+                <tr><td colspan="8" class="text-center py-4 text-muted">Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pagination -->
+      <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <small class="text-muted" id="paginationInfo">—</small>
+        <nav aria-label="Transactions pagination">
+          <ul class="pagination pagination-sm mb-0" id="paginationControls"></ul>
+        </nav>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<!-- Bottom Navigation (Mobile) -->
+<nav class="bottom-nav d-lg-none" aria-label="Main navigation">
+  <a href="index.html" class="bottom-nav-item"><i class="bi bi-speedometer2"></i><span>Home</span></a>
+  <a href="transactions.html" class="bottom-nav-item active"><i class="bi bi-arrow-left-right"></i><span>Txns</span></a>
+  <a href="budgets.html" class="bottom-nav-item"><i class="bi bi-piggy-bank"></i><span>Budget</span></a>
+  <a href="reports.html" class="bottom-nav-item"><i class="bi bi-bar-chart-line"></i><span>Reports</span></a>
+  <a href="settings.html" class="bottom-nav-item"><i class="bi bi-gear"></i><span>Settings</span></a>
+</nav>
+
+<a href="#" class="fab-add d-lg-none" data-bs-toggle="modal" data-bs-target="#transactionModal" aria-label="Add transaction"><i class="bi bi-plus-lg"></i></a>
+
+<!-- Hidden file inputs for import -->
+<input type="file" id="importFileInput" accept=".json,.csv,.xlsx,.xls" class="d-none" />
+
+<!-- Add/Edit Transaction Modal -->
+<div class="modal fade modal-bottom-sheet" id="transactionModal" tabindex="-1" aria-labelledby="transactionModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header border-0">
+        <h5 class="modal-title fw-bold" id="transactionModalLabel">Add Transaction</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form id="transactionForm" novalidate>
+          <input type="hidden" id="txId" />
+          <div class="d-flex gap-2 mb-3">
+            <input type="radio" class="btn-check" name="txType" id="typeExpense" value="Expense" checked />
+            <label class="btn btn-outline-danger flex-fill" for="typeExpense"><i class="bi bi-arrow-up-circle me-1"></i>Expense</label>
+            <input type="radio" class="btn-check" name="txType" id="typeIncome" value="Income" />
+            <label class="btn btn-outline-success flex-fill" for="typeIncome"><i class="bi bi-arrow-down-circle me-1"></i>Income</label>
+          </div>
+          <div class="mb-3">
+            <label for="txAmount" class="form-label">Amount <span class="text-danger">*</span></label>
+            <div class="input-group">
+              <span class="input-group-text" id="currencySymbol">₹</span>
+              <input type="number" class="form-control" id="txAmount" placeholder="0.00" min="0.01" step="0.01" required />
+              <div class="invalid-feedback">Please enter a valid amount.</div>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label for="txDate" class="form-label">Date <span class="text-danger">*</span></label>
+            <input type="date" class="form-control" id="txDate" required />
+            <div class="invalid-feedback">Please select a date.</div>
+          </div>
+          <div class="mb-3">
+            <label for="txCategory" class="form-label">Category <span class="text-danger">*</span></label>
+            <select class="form-select" id="txCategory" required>
+              <option value="">Select category...</option>
+            </select>
+            <div class="invalid-feedback">Please select a category.</div>
+          </div>
+          <div class="mb-3">
+            <label for="txPaymentMethod" class="form-label">Payment Method</label>
+            <select class="form-select" id="txPaymentMethod">
+              <option value="Cash">Cash</option>
+              <option value="Bank">Bank</option>
+              <option value="UPI">UPI</option>
+              <option value="Card">Card</option>
+              <option value="Wallet">Wallet</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="txNote" class="form-label">Note</label>
+            <input type="text" class="form-control" id="txNote" placeholder="Optional note..." maxlength="200" />
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer border-0">
+        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" id="saveTransactionBtn">
+          <i class="bi bi-check-lg me-1"></i>Save Transaction
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Import Options Modal -->
+<div class="modal fade" id="importModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content">
+      <div class="modal-header border-0">
+        <h6 class="modal-title fw-bold">Import Options</h6>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <p class="text-muted small mb-3">How would you like to import the data?</p>
+        <div class="d-grid gap-2">
+          <button class="btn btn-outline-primary" id="importMergeBtn">
+            <i class="bi bi-git me-2"></i>Merge with existing
+          </button>
+          <button class="btn btn-outline-danger" id="importReplaceBtn">
+            <i class="bi bi-arrow-clockwise me-2"></i>Replace all data
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content">
+      <div class="modal-body text-center p-4">
+        <div class="text-danger mb-3"><i class="bi bi-trash3 fs-1"></i></div>
+        <h6 class="fw-bold mb-2" id="deleteModalTitle">Delete Transaction?</h6>
+        <p class="text-muted small mb-3">This action cannot be undone.</p>
+        <div class="d-flex gap-2 justify-content-center">
+          <button class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+          <button class="btn btn-danger" id="confirmDeleteBtn">Delete</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index:9999" id="toastContainer"></div>
+<div class="loading-overlay d-none" id="loadingOverlay">
+  <div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+<script type="module" src="assets/js/app.js"></script>
+<script type="module" src="assets/js/transaction.js"></script>
+</body>
+</html>
