@@ -4,7 +4,7 @@
  */
 
 import db from './db.js';
-import { DEFAULT_CATEGORIES, setCurrencyPrefs, setDateFormat } from './utils.js';
+import { DEFAULT_CATEGORIES, setCurrencyPrefs, setDateFormat, todayInputDate } from './utils.js';
 import { showToast } from './ui.js';
 
 // ─── App Init ─────────────────────────────────────────────────────────────────
@@ -33,6 +33,15 @@ async function initApp() {
 
   // Expose db globally for other modules
   window.appDB = db;
+
+  // Ensure transaction date defaults to today if modal is on this page
+  const txDate = document.getElementById('txDate');
+  if (txDate) {
+    const today = todayInputDate();
+    txDate.defaultValue = today;
+    txDate.value = today;
+  }
+
   window.dispatchEvent(new CustomEvent('appReady'));
 }
 

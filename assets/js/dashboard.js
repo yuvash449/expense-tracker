@@ -9,6 +9,7 @@ import {
   getShortMonthName, getChartColor, setText
 } from './utils.js';
 import { emptyState, methodBadge, amountDisplay } from './ui.js';
+import { initTransactionForm } from './transaction-form.js';
 
 // ─── Chart instances ──────────────────────────────────────────────────────────
 let charts = {};
@@ -17,6 +18,7 @@ let charts = {};
 
 async function init() {
   setDashboardDate();
+  await initTransactionForm();
   await refresh();
 
   document.getElementById('dashboardPeriod')?.addEventListener('change', refresh);

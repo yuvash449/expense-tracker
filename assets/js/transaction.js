@@ -5,13 +5,16 @@
 
 import db from './db.js';
 import {
-  formatCurrency, formatDate, todayInputDate, validateTransaction,
+  formatCurrency, formatDate, todayInputDate,
   downloadJSON, downloadCSV, debounce, sumByType
 } from './utils.js';
 import {
   showToast, hideLoading, showLoading, emptyState,
   renderPagination, methodBadge, typeBadge, amountDisplay, confirmDialog
 } from './ui.js';
+import {
+  initTransactionForm, openEditTransaction
+} from './transaction-form.js';
 
 // ─── State ────────────────────────────────────────────────────────────────────
 
@@ -21,7 +24,6 @@ const state = {
   page: 1,
   pageSize: 25,
   selectedIds: new Set(),
-  editingId: null,
   importFileType: null,
   importData: null,
 };
@@ -32,7 +34,13 @@ async function init() {
   await loadTransactions();
   populateFilterCategories();
   populateFilterYearsMonths();
-  setupFormHandlers();
+  await initTransactionForm({
+    onSaved: async () => {
+      await loadTransactions();
+      populateFilterYearsMonths();
+      applyFilters();
+    },
+  });
   setupFilterHandlers();
   setupTableHandlers();
   setupImportExport();
@@ -83,25 +91,7 @@ function populateFilterYearsMonths() {
   }
 }
 
-// ─── Populate Modal Category Select ──────────────────────────────────────────
-
-async function populateModalCategories(type = 'Expense') {
-  const cats = await db.getCategoriesByType(type);
-  const select = document.getElementById('txCategory');
-  if (!select) return;
-  const current = select.value;
-  select.innerHTML = '<option value="">Select category...</option>';
-  cats.sort((a, b) => a.name.localeCompare(b.name))
-      .forEach(c => {
-        const opt = document.createElement('option');
-        opt.value = c.name;
-        opt.textContent = c.name;
-        select.appendChild(opt);
-      });
-  if (current) select.value = current;
-}
-
-// ─── Filtering & Sorting ──────────────────────────────────────────────────────
+// ─── Populate Modal Category Select (filters) ─────────────────────────────────
 
 function applyFilters() {
   const search  = document.getElementById('searchInput')?.value.toLowerCase().trim() || '';
@@ -237,91 +227,6 @@ function getCategoryIcon(name) {
   return _iconCache[name] || 'bi-tag';
 }
 
-// ─── Form Handlers ────────────────────────────────────────────────────────────
-
-function setupFormHandlers() {
-  const modal   = document.getElementById('transactionModal');
-  const form    = document.getElementById('transactionForm');
-  const saveBtn = document.getElementById('saveTransactionBtn');
-  const dateInput = document.getElementById('txDate');
-
-  if (dateInput) dateInput.value = todayInputDate();
-
-  // Type radio changes category list
-  document.querySelectorAll('[name="txType"]').forEach(radio => {
-    radio.addEventListener('change', () => populateModalCategories(radio.value));
-  });
-
-  // Reset form when modal opens for new tx
-  modal?.addEventListener('show.bs.modal', (e) => {
-    if (!state.editingId) {
-      resetForm();
-    }
-  });
-
-  modal?.addEventListener('hidden.bs.modal', () => {
-    state.editingId = null;
-    resetForm();
-  });
-
-  saveBtn?.addEventListener('click', saveTransaction);
-  form?.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') saveTransaction();
-  });
-}
-
-function resetForm() {
-  const form = document.getElementById('transactionForm');
-  if (!form) return;
-  form.classList.remove('was-validated');
-  form.reset();
-  document.getElementById('txId').value = '';
-  document.getElementById('txDate').value = todayInputDate();
-  document.getElementById('transactionModalLabel').textContent = 'Add Transaction';
-  document.getElementById('typeExpense').checked = true;
-  populateModalCategories('Expense');
-}
-
-async function saveTransaction() {
-  const form = document.getElementById('transactionForm');
-  if (!form) return;
-
-  const type   = document.querySelector('[name="txType"]:checked')?.value || 'Expense';
-  const amount = document.getElementById('txAmount')?.value;
-  const date   = document.getElementById('txDate')?.value;
-  const category = document.getElementById('txCategory')?.value;
-  const paymentMethod = document.getElementById('txPaymentMethod')?.value || 'Cash';
-  const note   = document.getElementById('txNote')?.value?.trim() || '';
-  const txId   = document.getElementById('txId')?.value;
-
-  const { valid } = validateTransaction({ type, amount, date, category });
-  form.classList.add('was-validated');
-  if (!valid) return;
-
-  const txData = { type, amount: parseFloat(amount), date, category, paymentMethod, note };
-
-  try {
-    if (txId) {
-      await db.updateTransaction({ ...txData, id: parseInt(txId) });
-      showToast('Transaction updated successfully', 'success');
-    } else {
-      await db.addTransaction(txData);
-      showToast('Transaction added successfully', 'success');
-    }
-
-    const modalEl = document.getElementById('transactionModal');
-    bootstrap.Modal.getInstance(modalEl)?.hide();
-
-    await loadTransactions();
-    populateFilterYearsMonths();
-    applyFilters();
-    window.dispatchEvent(new CustomEvent('transactionsChanged'));
-  } catch (err) {
-    showToast('Failed to save transaction', 'error');
-    console.error(err);
-  }
-}
-
 // ─── Table Handlers ───────────────────────────────────────────────────────────
 
 function setupTableHandlers() {
@@ -382,25 +287,7 @@ function updateBulkDeleteBtn() {
 }
 
 async function editTransaction(id) {
-  const tx = await db.getTransaction(id);
-  if (!tx) return;
-
-  state.editingId = id;
-  document.getElementById('txId').value     = tx.id;
-  document.getElementById('txAmount').value = tx.amount;
-  document.getElementById('txDate').value   = tx.date;
-  document.getElementById('txNote').value   = tx.note || '';
-
-  // Set type radio
-  const typeRadio = document.querySelector(`[name="txType"][value="${tx.type}"]`);
-  if (typeRadio) typeRadio.checked = true;
-  await populateModalCategories(tx.type);
-  document.getElementById('txCategory').value = tx.category;
-  document.getElementById('txPaymentMethod').value = tx.paymentMethod || 'Cash';
-  document.getElementById('transactionModalLabel').textContent = 'Edit Transaction';
-
-  const modalEl = document.getElementById('transactionModal');
-  bootstrap.Modal.getOrCreateInstance(modalEl).show();
+  await openEditTransaction(id);
 }
 
 async function deleteTransaction(id) {

@@ -21,6 +21,7 @@ const PRECACHE_ASSETS = [
   './assets/js/db.js',
   './assets/js/utils.js',
   './assets/js/ui.js',
+  './assets/js/transaction-form.js',
   './assets/js/transaction.js',
   './assets/js/dashboard.js',
   './assets/js/report.js',
