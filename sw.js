@@ -1,13 +1,11 @@
 /**
  * sw.js – Service Worker for ExpenseTracker PWA
- * Provides offline support via Cache-First strategy for static assets
- * and Network-First for dynamic content.
+ * Cache-first for the full app shell so the app works completely offline.
  */
 
-const CACHE_NAME = 'expense-tracker-v2';
+const CACHE_NAME = 'expense-tracker-v4';
 const OFFLINE_URL = './offline.html';
 
-// Assets to precache on install
 const PRECACHE_ASSETS = [
   './',
   './index.html',
@@ -15,12 +13,14 @@ const PRECACHE_ASSETS = [
   './reports.html',
   './budgets.html',
   './settings.html',
+  './offline.html',
   './manifest.json',
   './assets/css/style.css',
   './assets/js/app.js',
   './assets/js/db.js',
   './assets/js/utils.js',
   './assets/js/ui.js',
+  './assets/js/pwa.js',
   './assets/js/transaction-form.js',
   './assets/js/transaction.js',
   './assets/js/dashboard.js',
@@ -28,77 +28,71 @@ const PRECACHE_ASSETS = [
   './assets/js/chart.js',
   './assets/js/settings.js',
   './assets/js/budget.js',
+  './assets/vendor/bootstrap.min.css',
+  './assets/vendor/bootstrap-icons.min.css',
+  './assets/vendor/bootstrap-icons.woff2',
+  './assets/vendor/bootstrap-icons.woff',
+  './assets/vendor/bootstrap.bundle.min.js',
+  './assets/vendor/chart.umd.min.js',
+  './assets/vendor/jspdf.umd.min.js',
+  './assets/vendor/jspdf.plugin.autotable.min.js',
+  './assets/vendor/xlsx.full.min.js',
+  './icons/icon-72.png',
+  './icons/icon-96.png',
+  './icons/icon-128.png',
+  './icons/icon-192.png',
+  './icons/icon-512.png',
 ];
-
-// CDN assets to cache on first use
-const CDN_HOSTS = [
-  'cdn.jsdelivr.net',
-  'cdn.sheetjs.com',
-];
-
-// ─── Install ──────────────────────────────────────────────────────────────────
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then(async (cache) => {
       console.log('[SW] Pre-caching app shell');
-      // Cache each asset individually, don't fail on errors
-      const results = await Promise.allSettled(
-        PRECACHE_ASSETS.map(url => cache.add(url).catch(err => {
-          console.warn('[SW] Failed to cache:', url, err);
-        }))
+      await Promise.allSettled(
+        PRECACHE_ASSETS.map((url) =>
+          cache.add(url).catch((err) => {
+            console.warn('[SW] Failed to cache:', url, err);
+          })
+        )
       );
-      return results;
-    }).then(() => self.skipWaiting())
+    })
   );
+  // Do not skipWaiting here — let the client confirm via update banner
 });
-
-// ─── Activate ─────────────────────────────────────────────────────────────────
 
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then(cacheNames => {
-      return Promise.all(
+    caches.keys().then((cacheNames) =>
+      Promise.all(
         cacheNames
-          .filter(name => name !== CACHE_NAME)
-          .map(name => {
+          .filter((name) => name !== CACHE_NAME)
+          .map((name) => {
             console.log('[SW] Deleting old cache:', name);
             return caches.delete(name);
           })
-      );
-    }).then(() => self.clients.claim())
+      )
+    ).then(() => self.clients.claim())
   );
 });
-
-// ─── Fetch ────────────────────────────────────────────────────────────────────
 
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
 
-  // Skip non-GET and non-HTTP(S)
   if (request.method !== 'GET') return;
   if (!['http:', 'https:'].includes(url.protocol)) return;
+  if (url.origin !== self.location.origin) return;
 
-  // CDN assets: Cache-First
-  if (CDN_HOSTS.some(host => url.hostname.includes(host))) {
-    event.respondWith(cacheFirst(request));
+  // Navigations: network-first so updates land, cache/offline fallback
+  if (request.mode === 'navigate') {
+    event.respondWith(networkFirstNavigation(request));
     return;
   }
 
-  // Same-origin: Cache-First with network fallback
-  if (url.origin === self.location.origin) {
-    event.respondWith(cacheFirstWithNetworkFallback(request));
-    return;
-  }
+  event.respondWith(cacheFirstWithNetworkFallback(request));
 });
 
-// ─── Strategies ───────────────────────────────────────────────────────────────
-
-async function cacheFirst(request) {
-  const cached = await caches.match(request);
-  if (cached) return cached;
-
+async function networkFirstNavigation(request) {
   try {
     const response = await fetch(request);
     if (response.ok) {
@@ -107,12 +101,16 @@ async function cacheFirst(request) {
     }
     return response;
   } catch {
-    return new Response('Offline', { status: 503 });
+    const cached = await caches.match(request, { ignoreSearch: true });
+    if (cached) return cached;
+    const offlinePage = await caches.match(OFFLINE_URL);
+    if (offlinePage) return offlinePage;
+    return caches.match('./index.html');
   }
 }
 
 async function cacheFirstWithNetworkFallback(request) {
-  const cached = await caches.match(request);
+  const cached = await caches.match(request, { ignoreSearch: true });
   if (cached) return cached;
 
   try {
@@ -123,19 +121,12 @@ async function cacheFirstWithNetworkFallback(request) {
     }
     return response;
   } catch {
-    // Return offline page for navigation requests
-    if (request.mode === 'navigate') {
-      const offlinePage = await caches.match('./index.html');
-      if (offlinePage) return offlinePage;
-    }
     return new Response(
       JSON.stringify({ error: 'Offline', message: 'No network connection' }),
       { status: 503, headers: { 'Content-Type': 'application/json' } }
     );
   }
 }
-
-// ─── Message Handler ──────────────────────────────────────────────────────────
 
 self.addEventListener('message', (event) => {
   if (event.data?.type === 'SKIP_WAITING') {

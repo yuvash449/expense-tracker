@@ -1149,3 +1149,68 @@ img, canvas, svg, table {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
 }
+
+/* ============================================
+   PWA: offline bar, update banner, install
+   ============================================ */
+.pwa-offline-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1080;
+  background: #664d03;
+  color: #fff;
+  text-align: center;
+  font-size: 0.8rem;
+  font-weight: 500;
+  padding: 0.4rem 0.75rem;
+  padding-top: calc(0.4rem + env(safe-area-inset-top, 0px));
+}
+
+.pwa-update-banner {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1080;
+  padding: 0.75rem;
+  padding-bottom: calc(0.75rem + env(safe-area-inset-bottom, 0px));
+  pointer-events: none;
+}
+
+.pwa-update-inner {
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  max-width: 520px;
+  margin: 0 auto;
+  background: #0d6efd;
+  color: #fff;
+  border-radius: 12px;
+  padding: 0.65rem 0.85rem;
+  box-shadow: var(--shadow-md);
+  font-size: 0.875rem;
+}
+
+body.is-offline .app-navbar {
+  top: 28px;
+}
+
+body.is-offline .app-wrapper {
+  padding-top: calc(var(--navbar-height) + 28px);
+}
+
+@media (max-width: 991.98px) {
+  body.is-offline .bottom-nav {
+    /* keep above update banner when both show */
+  }
+  body.pwa-standalone {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+}
+
+#installPWABtn {
+  white-space: nowrap;
+}

@@ -6,9 +6,14 @@
   <meta name="theme-color" content="#0d6efd" />
   <title>Expense Tracker – Settings</title>
   <link rel="manifest" href="manifest.json" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
-  <link rel="stylesheet" href="assets/css/style.css?v=4" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="ExpenseTracker" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <link rel="stylesheet" href="assets/vendor/bootstrap.min.css" />
+  <link rel="stylesheet" href="assets/vendor/bootstrap-icons.min.css" />
+  <link rel="stylesheet" href="assets/css/style.css" />
 </head>
 <body>
 
@@ -161,6 +166,37 @@
             </div>
           </div>
 
+          <!-- App (PWA) -->
+          <div class="card border-0 shadow-sm mb-4">
+            <div class="card-header bg-transparent border-0">
+              <h6 class="fw-semibold mb-0"><i class="bi bi-phone me-2"></i>App &amp; Offline</h6>
+            </div>
+            <div class="card-body">
+              <div class="d-flex flex-wrap gap-2 mb-3">
+                <span id="pwaDisplayMode" class="badge bg-secondary-subtle text-secondary">—</span>
+                <span id="pwaNetworkStatus" class="badge bg-secondary-subtle text-secondary">—</span>
+                <span class="badge bg-primary-subtle text-primary">Cache: <span id="pwaCacheVersion">—</span></span>
+              </div>
+              <p class="text-muted small mb-3">
+                Install ExpenseTracker on your device for a full-screen app experience. All data stays in IndexedDB on this device.
+              </p>
+              <div class="d-flex flex-wrap gap-2">
+                <button type="button" class="btn btn-primary d-none" id="settingsInstallBtn" data-pwa-install>
+                  <i class="bi bi-download me-1"></i>Install App
+                </button>
+                <button type="button" class="btn btn-outline-primary d-none" id="settingsUpdateBtn">
+                  <i class="bi bi-arrow-repeat me-1"></i>Apply Update
+                </button>
+                <button type="button" class="btn btn-outline-secondary" id="settingsClearCacheBtn">
+                  <i class="bi bi-trash3 me-1"></i>Clear Cache
+                </button>
+              </div>
+              <p class="text-muted small mt-3 mb-0 d-none" id="iosInstallHint">
+                <i class="bi bi-info-circle me-1"></i>On iPhone/iPad: tap <strong>Share</strong> then <strong>Add to Home Screen</strong>.
+              </p>
+            </div>
+          </div>
+
           <!-- About -->
           <div class="card border-0 shadow-sm">
             <div class="card-header bg-transparent border-0">
@@ -293,8 +329,8 @@
   <div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+<script src="assets/vendor/bootstrap.bundle.min.js"></script>
+<script src="assets/vendor/xlsx.full.min.js"></script>
 <script type="module" src="assets/js/app.js"></script>
 <script type="module" src="assets/js/settings.js"></script>
 </body>

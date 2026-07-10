@@ -1,55 +1,98 @@
 {
+  "id": "./",
   "name": "ExpenseTracker – Personal Finance",
   "short_name": "ExpenseTracker",
-  "description": "Professional personal finance tracker with offline support",
+  "description": "Track income, expenses, budgets, and reports completely offline.",
   "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
+  "display_override": ["standalone", "minimal-ui", "browser"],
   "background_color": "#ffffff",
   "theme_color": "#0d6efd",
   "orientation": "any",
   "categories": ["finance", "productivity"],
   "lang": "en",
-  "scope": "./",
+  "dir": "ltr",
+  "prefer_related_applications": false,
+  "launch_handler": {
+    "client_mode": ["navigate-existing", "auto"]
+  },
   "icons": [
     {
       "src": "icons/icon-72.png",
       "sizes": "72x72",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
       "src": "icons/icon-96.png",
       "sizes": "96x96",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
       "src": "icons/icon-128.png",
       "sizes": "128x128",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
       "src": "icons/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "icons/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ],
-  "screenshots": [],
   "shortcuts": [
     {
       "name": "Add Transaction",
+      "short_name": "Add",
       "url": "./transactions.html",
-      "description": "Add a new transaction"
+      "description": "Add a new transaction",
+      "icons": [{ "src": "icons/icon-96.png", "sizes": "96x96", "type": "image/png" }]
     },
     {
       "name": "View Reports",
+      "short_name": "Reports",
       "url": "./reports.html",
-      "description": "View financial reports"
+      "description": "View financial reports",
+      "icons": [{ "src": "icons/icon-96.png", "sizes": "96x96", "type": "image/png" }]
+    },
+    {
+      "name": "Budgets",
+      "short_name": "Budgets",
+      "url": "./budgets.html",
+      "description": "Manage monthly budgets",
+      "icons": [{ "src": "icons/icon-96.png", "sizes": "96x96", "type": "image/png" }]
     }
-  ]
+  ],
+  "share_target": {
+    "action": "./settings.html",
+    "method": "GET",
+    "enctype": "application/x-www-form-urlencoded",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  },
+  "handle_links": "preferred"
 }

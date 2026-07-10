@@ -5,7 +5,7 @@
 
 import db from './db.js';
 import { DEFAULT_CATEGORIES, setCurrencyPrefs, setDateFormat, todayInputDate } from './utils.js';
-import { showToast } from './ui.js';
+import { initPWA } from './pwa.js';
 
 // ─── App Init ─────────────────────────────────────────────────────────────────
 
@@ -25,7 +25,7 @@ async function initApp() {
   // 5. Setup UI
   setupThemeToggle();
   setupSidebar();
-  setupPWAInstall();
+  initPWA();
   updateCurrencySymbols();
 
   // 6. Mark current nav link active
@@ -216,44 +216,6 @@ function setActiveNav() {
     } else {
       link.classList.remove('active');
     }
-  });
-}
-
-// ─── PWA Install ──────────────────────────────────────────────────────────────
-
-let _deferredInstall = null;
-
-function setupPWAInstall() {
-  window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    _deferredInstall = e;
-
-    // Show install button if it exists
-    const btn = document.getElementById('installPWABtn');
-    if (btn) btn.classList.remove('d-none');
-  });
-
-  const installBtn = document.getElementById('installPWABtn');
-  installBtn?.addEventListener('click', async () => {
-    if (!_deferredInstall) return;
-    _deferredInstall.prompt();
-    const { outcome } = await _deferredInstall.userChoice;
-    if (outcome === 'accepted') {
-      showToast('App installed successfully!', 'success');
-    }
-    _deferredInstall = null;
-    installBtn.classList.add('d-none');
-  });
-}
-
-// ─── Service Worker Registration ─────────────────────────────────────────────
-
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker
-      .register('./sw.js')
-      .then(reg => console.log('[SW] Registered:', reg.scope))
-      .catch(err => console.warn('[SW] Registration failed:', err));
   });
 }
 
