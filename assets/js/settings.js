@@ -36,7 +36,7 @@ async function loadPreferences() {
   if (currencySel)   currencySel.value   = settings.currency   || 'INR';
   if (dateFormatSel) dateFormatSel.value = settings.dateFormat || 'DD/MM/YYYY';
   if (decimalsSel)   decimalsSel.value   = settings.decimals   ?? 2;
-  if (themeSel)      themeSel.value      = settings.theme      || 'light';
+  if (themeSel)      themeSel.value      = settings.theme      || 'dark';
 }
 
 function setupPreferenceHandlers() {
@@ -44,7 +44,7 @@ function setupPreferenceHandlers() {
     const currency   = document.getElementById('settingCurrency')?.value   || 'INR';
     const dateFormat = document.getElementById('settingDateFormat')?.value || 'DD/MM/YYYY';
     const decimals   = document.getElementById('settingDecimals')?.value   ?? 2;
-    const theme      = document.getElementById('settingTheme')?.value      || 'light';
+    const theme      = document.getElementById('settingTheme')?.value      || 'dark';
 
     await db.setSetting('currency',   currency);
     await db.setSetting('dateFormat', dateFormat);

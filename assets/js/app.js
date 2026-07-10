@@ -63,7 +63,7 @@ async function applySettings() {
   const currency  = settings.currency  || 'INR';
   const decimals  = settings.decimals  ?? 2;
   const dateFormat = settings.dateFormat || 'DD/MM/YYYY';
-  const theme     = settings.theme     || 'system';
+  const theme     = settings.theme     || 'dark';
 
   setCurrencyPrefs(currency, decimals);
   setDateFormat(dateFormat);
